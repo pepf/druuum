@@ -51,13 +51,15 @@
 		this.element.addEventListener('mousedown', function(e) {
 			var h = _this.element.offsetHeight;
 
-			if (e.offsetY < 50) {
-				dragpoint = 1;
+			if(e.offsetY<200) { return; }
+
+			if (e.altKey) {
+				dragpoint = 2;
  				dragX(e.offsetX);
  			}
 
-			if (e.offsetY > h - 50) {
- 				dragpoint = 2;
+			else {
+ 				dragpoint = 1;
  				dragX(e.offsetX);
  			}
 		});
@@ -116,6 +118,8 @@
 		var selx = w * this.offset / 1000 / dur;
 		var selw = w * this.decay / 1000 / dur;
 		this.context.fillRect(selx, 0, selw, h);
+		this.context.fillStyle = '#fff';
+		this.context.fillRect(selx, 200, selw, 2);
 		this.context.fillStyle = '#0f0';
 		for(var i=0; i<w; i++) {
 			var o = Math.floor(i * this.samples.length / w);

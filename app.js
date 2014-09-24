@@ -147,9 +147,10 @@
 		}
 	];
 
-	var TableSequencer = function() {
+	var TableSequencer = function(pl) {
 		this.selectedtrack = -1;
 		this.onSelectTrack = null;
+		this.player = pl;
 	}
 
 	TableSequencer.prototype.create = function(id) {
@@ -190,6 +191,19 @@
 		console.log(v);
 		this.pattern.tracks[t].slice.pitch = v;
 	}
+	TableSequencer.prototype.muteTrack = function(t, e) {
+		console.log("muted track ", t)
+		e.stopPropagation();
+		this.pattern.tracks[t].mute = (this.pattern.tracks[t].mute) ? false : true;
+		$(e.target).toggleClass("btn-danger");
+	}
+
+	TableSequencer.prototype.soloTrack = function(t, e) {
+		console.log("solo track ", t)
+		e.stopPropagation();
+		this.player.solo = (this.player.solo==t) ? null : t;
+		$(e.target).toggleClass("btn-success");
+	}
 
 	TableSequencer.prototype.draw = function() {
 		var _this = this;
@@ -199,9 +213,16 @@
 			var tr = $('<tr>');
 			if (i == this.selectedtrack) tr.addClass('selected');
 			var td1 = $('<th>');
-			td1.text('Track '+(1+i));
+			td1.html('Track '+(1+i)+'<br/>');
 			td1.click(this.assigntrack.bind(this, i));
 			tr.append(td1);
+			//Mute and solo buttons
+			var muteButton = $("<button class='btn-xs btn'>M</button>");
+			muteButton.click(this.muteTrack.bind(this, i));
+			var soloButton = $("<button class='btn-xs btn'>S</button>");
+			soloButton.click(this.soloTrack.bind(this, i));
+			td1.append(muteButton);
+			td1.append(soloButton);
 			for(var j=0; j<this.pattern.numsteps; j++) {
 				var td = $('<td>');
 				td.addClass('c' + j);
@@ -428,8 +449,9 @@
 			// console.log('persisting json', json);
 			location.hash = window.btoa(json);
 		}
+		var player = new Player();
 
-		var ts = new TableSequencer();
+		var ts = new TableSequencer(player);
 		ts.create('seq');
 		ts.pattern = pat;
 		ts.onSelectTrack = function(trk) {
@@ -452,7 +474,7 @@
 			sampler.trigSlice(slice);
 		}
 
-		var player = new Player();
+
 		player.pattern = pat;
 		player.sampler = sampler;
 		player.setBPM(125);

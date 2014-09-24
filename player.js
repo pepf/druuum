@@ -11,6 +11,7 @@
 		this.timer = null;
 		this.beattimer = 0;
 		this.lasttime = 0;
+		this.solo = null; //placeholder for solo track nr
 	}
 
 	Player.prototype.tick = function() {
@@ -18,8 +19,10 @@
 		// console.log('Player tick', this.pattern.position);
 		for(var i=0; i<this.pattern.tracks.length; i++) {
 			var trk = this.pattern.tracks[i];
-			if (trk.steps[this.position] == 1) {
-				this.sampler.trigSlice(trk.slice);
+			if (trk.steps[this.position] == 1 && !trk.mute) {
+				if(this.solo == null || this.solo == i) {
+					this.sampler.trigSlice(trk.slice);
+				}
 			}
 		}
 		this.position ++;

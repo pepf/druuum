@@ -74,6 +74,7 @@
 				var audioData = request.response;
 				console.log('audio onload', audioData);
 				_this.context.decodeAudioData(audioData, function(tmpbuffer) {
+					var context = _this.context;
 					var monobuffer = tmpbuffer.getChannelData(0);
 					console.log('monobuffer', monobuffer.length);
 					var maxlength = _this.maxsamples;
@@ -85,6 +86,30 @@
 					for(var i=0; i<newlength; i++) {
 						audioData2[i] = monobuffer[i];
 					}
+
+					// setup a javascript node
+	        javascriptNode = context.createScriptProcessor(2048, 1, 1);
+	        // connect to destination, else it isn't called
+	        javascriptNode.connect(context.destination);
+
+	        // setup a analyzer
+	        analyser = context.createAnalyser();
+	        analyser.smoothingTimeConstant = 0.3;
+	        analyser.fftSize = 32;
+
+	        // create a buffer source node
+	        sourceNode = context.createBufferSource();
+					sourceNode.buffer = tmpbuffer;
+	        sourceNode.connect(analyser);
+					//sourceNode.start(0);
+	        analyser.connect(javascriptNode);
+			    javascriptNode.onaudioprocess = function () {
+			        // get the average for the first channel
+			        var array = new Uint8Array(analyser.frequencyBinCount);
+			        analyser.getByteFrequencyData(array);
+
+			    }
+					//obj.frequencies =
 					// tmpbuffer.getChannelData(0).set(audioData2);
 					obj.buffer = tmpbuffer2;// _this.context.createBuffer(tmpbuffer, true);
 					obj.state = 'ready';

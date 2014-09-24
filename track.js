@@ -1,6 +1,8 @@
 (function(exports) {
 
 	var Track = function(numsteps) {
+		this.mute = false;
+		this.solo = false;
 		this.steps = [];
 		this.decay = 1000;
 		this.offset = 0;
